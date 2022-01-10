@@ -38,7 +38,7 @@ app.post('/subs', async (req, res) => {
             period,
             item: {
                 name,
-                amount,
+                amount:(Math.round(amount))*100,
                 currency
             }
         });
