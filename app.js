@@ -22,6 +22,7 @@ var instance = new Razorpay({
     key_secret: '4pGdg0EDFTKo0eAS66jjWjD2'
 });
 
+//Create Plan & subscription
 app.post('/subs', async (req, res) => {
     let currency = "INR";
     let period = "monthly";
@@ -65,17 +66,41 @@ app.post('/subs', async (req, res) => {
     return res.status(200).json({ success: false, msg: "Error Occurred" });
 })
 
+//Get Subscription by id
 app.get('/status/:subs_id', async (req, res) => {
     const { subs_id } = req.params;
     try {
-        const subsData = await instance.subscriptions.fetch(subs_id);
-        res.status(200).json({ success: true, msg: subsData });
-
+        setInterval(async() => {
+            const subsData = await instance.subscriptions.fetch(subs_id);
+            console.log(subsData.status)
+            if (subsData.status === "active") {
+                //   await Orders.update({payment_status:"paid"},{
+                //       where :{
+                //         subscribeID:subs_id
+                //       }
+                //   })  
+                return res.status(200).json({ success: true, msg: subsData });
+            }
+        }, 3000);
     } catch (error) {
         console.log('Error -->', error);
         return res.status(200).json({ success: false, msg: error });
     }
+})
 
+app.get('/registerOrders', async (req, res) => {
+    try {
+        const allSubscription = await instance.subscriptions.all();
+        allSubscription.items.map(itm => {
+            if (itm.status === "active") {
+
+            }
+        })
+        res.status(200).json({ success: true, msg: allSubscription });
+    } catch (error) {
+        console.log('Error --> ', error);
+        return res.status(200).json({ success: false, msg: error });
+    }
 })
 const PORT = process.env.PORT || 5000;
 
