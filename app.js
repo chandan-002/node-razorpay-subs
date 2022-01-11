@@ -24,10 +24,10 @@ var instance = new Razorpay({
 
 //Create Plan & subscription
 app.post('/subs', async (req, res) => {
+    console.log("Creating subscription")
     let currency = "INR";
     let period = "monthly";
     let customer_notify = 1;
-
     const { interval, name, amount, quantity, total_count, email, number,
     } = req.body;
     //Create Subscription ;
@@ -70,7 +70,7 @@ app.post('/subs', async (req, res) => {
 app.get('/status/:subs_id', async (req, res) => {
     const { subs_id } = req.params;
     try {
-        setInterval(async() => {
+        setInterval(async () => {
             const subsData = await instance.subscriptions.fetch(subs_id);
             console.log(subsData.status)
             if (subsData.status === "active") {
@@ -93,7 +93,13 @@ app.get('/registerOrders', async (req, res) => {
         const allSubscription = await instance.subscriptions.all();
         allSubscription.items.map(itm => {
             if (itm.status === "active") {
-
+                console.log(itm)
+                // const data = await Orders.find({}, {
+                //     where: {
+                //         subscribeID: itm.id
+                //     }
+                // })
+                // await Orders.create(data)
             }
         })
         res.status(200).json({ success: true, msg: allSubscription });
@@ -102,6 +108,7 @@ app.get('/registerOrders', async (req, res) => {
         return res.status(200).json({ success: false, msg: error });
     }
 })
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
