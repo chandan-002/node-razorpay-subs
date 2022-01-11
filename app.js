@@ -2,7 +2,7 @@ const express = require('express');
 const Razorpay = require('razorpay');
 const cors = require('cors');
 const chalk = require("chalk");
-const {db} = require('./config/conn');
+const { db } = require('./config/conn');
 
 const app = express();
 
@@ -38,7 +38,7 @@ app.post('/subs', async (req, res) => {
             period,
             item: {
                 name,
-                amount:(Math.round(amount))*100,
+                amount: (Math.round(amount)) * 100,
                 currency
             }
         });
@@ -63,6 +63,19 @@ app.post('/subs', async (req, res) => {
         return res.status(200).json({ success: true, msg: { url: subs } });
     }
     return res.status(200).json({ success: false, msg: "Error Occurred" });
+})
+
+app.get('/status/:subs_id', async (req, res) => {
+    const { subs_id } = req.params;
+    try {
+        const subsData = await instance.subscriptions.fetch(subs_id);
+        res.status(200).json({ success: true, msg: subsData });
+
+    } catch (error) {
+        console.log('Error -->', error);
+        return res.status(200).json({ success: false, msg: error });
+    }
+
 })
 const PORT = process.env.PORT || 5000;
 
