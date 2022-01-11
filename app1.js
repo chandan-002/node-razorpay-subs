@@ -22,55 +22,10 @@ var instance = new Razorpay({
     key_secret: '4pGdg0EDFTKo0eAS66jjWjD2'
 });
 
-//Create Plan & subscription
-app.post('/subs', async (req, res) => {
-    console.log("Creating subscription")
-    let currency = "INR";
-    let period = "monthly";
-    let customer_notify = 1;
-    const { interval, name, amount, quantity, total_count, email, number,
-    } = req.body;
-    //Create Subscription ;
-    var plan = {};
-    var subs = {};
-    try {
-        plan = await instance.plans.create({
-            interval,
-            period,
-            item: {
-                name,
-                amount: (Math.round(amount)) * 100,
-                currency
-            }
-        });
-        // console.log("---->",plan)
-        subs = await instance.subscriptions.create({
-            plan_id: plan.id,
-            quantity,
-            total_count,
-            customer_notify,
-            notify_info: {
-                // notify_phone: number,
-                notify_email: email
-            }
-        });
-
-    } catch (error) {
-        console.log('Error -->', error)
-        return res.status(200).json({ success: false, msg: error });
-    }
-
-    if (subs) {
-        return res.status(200).json({ success: true, msg: { url: subs } });
-    }
-    return res.status(200).json({ success: false, msg: "Error Occurred" });
-})
-
 //Get Subscription by id
 app.get('/status/:subs_id', async (req, res) => {
     const { subs_id } = req.params;
     try {
-
         setInterval(async () => {
             const subsData = await instance.subscriptions.fetch(subs_id);
             console.log(subsData.status)
@@ -104,28 +59,7 @@ app.get('/status/:subs_id', async (req, res) => {
     }
 })
 
-app.get('/registerOrders', async (req, res) => {
-    try {
-        const allSubscription = await instance.subscriptions.all();
-        allSubscription.items.map(itm => {
-            if (itm.status === "active") {
-                console.log(itm)
-                // const data = await Orders.find({}, {
-                //     where: {
-                //         subscribeID: itm.id
-                //     }
-                // })
-                // await Orders.create(data)
-            }
-        })
-        res.status(200).json({ success: true, msg: allSubscription });
-    } catch (error) {
-        console.log('Error --> ', error);
-        return res.status(200).json({ success: false, msg: error });
-    }
-})
-
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
     console.log(`Server started on ${PORT}`)
