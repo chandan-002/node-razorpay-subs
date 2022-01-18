@@ -107,7 +107,7 @@ app.get('/status/:subs_id', async (req, res) => {
 app.get('/registerOrders', async (req, res) => {
     try {
         const allSubscription = await instance.subscriptions.all();
-        allSubscription.items.map(itm => {
+        allSubscription.items.map(async itm => {
             if (itm.status === "active") {
                 console.log(itm)
                 const data = await Orders.find({}, {
@@ -115,7 +115,7 @@ app.get('/registerOrders', async (req, res) => {
                         subscribeID: itm.id
                     }
                 })
-                console.log("Active Found --------->",data)
+                console.log("Active Found --------->", data)
                 // await Orders.create(data)
             }
         })
