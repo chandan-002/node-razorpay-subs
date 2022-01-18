@@ -110,19 +110,42 @@ app.get('/registerOrders', async (req, res) => {
         allSubscription.items.map(async itm => {
             if (itm.status === "active") {
                 console.log(itm)
-                const data = await Orders.find({}, {
+                const data = await Orders.findAll({
                     where: {
                         subscribeID: itm.id
                     }
                 })
-                console.log("Active Found --------->", data)
+                // console.log("Active Found --------->", data)
                 // await Orders.create(data)
             }
         })
-        res.status(200).json({ success: true, msg: allSubscription });
+        await Orders.destroy({
+            where: {
+                subscribeID: 'sub_IjD6bzbcKzUmeS'
+            }
+        }).then(async datax => {
+            console.log('Deleted Successfully ----->', datax)
+            const data = await Orders.findAll({
+                where: {
+                    subscribeID: 'sub_IjD6bzbcKzUmeS'
+                },
+                raw: true
+            })
+            let obj = {
+                date: Date.now(),
+                ...data
+            }
+            delete obj.id;
+            console.log('Data ----> ', obj)
+            Orders.create(obj).then(dt => {
+                return res.status(400).json({ success: true, msg: dt })
+            }).catch(err => { return res.status(400).json({ success: false, msg: { "error": err } }) });
+        }).catch(err => {
+            return res.status(400).json({ success: false, msg: { "error": err } })
+        })
     } catch (error) {
         console.log('Error --> ', error);
-        return res.status(200).json({ success: false, msg: error });
+        return res.status(400).json({ success: false, msg: error });
     }
 })
 

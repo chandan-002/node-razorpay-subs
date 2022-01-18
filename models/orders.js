@@ -95,4 +95,4 @@ exports.Orders = db.define('orders', {
     type: seq.TEXT,
     allowNull: true,
   }
-}, { freezeTableName: true, timestamps: false });
+}, { freezeTableName: true, timestamps: true });
