@@ -25,6 +25,7 @@ var instance = new Razorpay({
 //Get Subscription by id
 app.get('/status/:subs_id', async (req, res) => {
     const { subs_id } = req.params;
+    console.log('Body Data ==> ',subs_id)
     try {
         setInterval(async () => {
             const subsData = await instance.subscriptions.fetch(subs_id);
