@@ -110,11 +110,12 @@ app.get('/registerOrders', async (req, res) => {
         allSubscription.items.map(itm => {
             if (itm.status === "active") {
                 console.log(itm)
-                // const data = await Orders.find({}, {
-                //     where: {
-                //         subscribeID: itm.id
-                //     }
-                // })
+                const data = await Orders.find({}, {
+                    where: {
+                        subscribeID: itm.id
+                    }
+                })
+                console.log("Active Found --------->",data)
                 // await Orders.create(data)
             }
         })
