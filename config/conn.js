@@ -19,6 +19,7 @@ if (process.env.NODE_ENV === 'PRODUCTION') {
         dialect: 'mysql',
         port: '3307', //-------------> change port here
         // operatorsAliases: false,
+        logging:false,
         pool: {
             max: 5,
             min: 0,
