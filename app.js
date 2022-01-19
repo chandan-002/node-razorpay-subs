@@ -3,12 +3,15 @@ const Razorpay = require('razorpay');
 const cors = require('cors');
 const chalk = require("chalk");
 const { db } = require('./config/conn');
+var cron = require('node-cron');
+
 
 const app = express();
 
 //Models
 const { Orders } = require('./models/orders');
 const { Combined } = require('./models/combined_orders');
+const { OrderDetails } = require('./models/order_details');
 
 app.use(express.json());
 app.use(cors());
@@ -63,7 +66,7 @@ app.post('/subs', async (req, res) => {
     if (subs) {
         return res.status(200).json({ success: true, msg: { url: subs } });
     }
-    return res.status(200).json({ success: false, msg: "Error Occurred" });
+    return res.status(400).json({ success: false, msg: "Error Occurred" });
 })
 
 //Get Subscription by id
@@ -100,55 +103,78 @@ app.get('/status/:subs_id', async (req, res) => {
         // }
     } catch (error) {
         console.log('Error -->', error);
-        return res.status(200).json({ success: false, msg: error });
+        return res.status(400).json({ success: false, msg: error });
     }
 })
+
+//cron job
+cron.schedule('* * * * *', () => {
+    console.log('I run in 1 min');
+});
 
 app.get('/registerOrders', async (req, res) => {
     try {
         const allSubscription = await instance.subscriptions.all();
-        allSubscription.items.map(async itm => {
-            if (itm.status === "active") {
-                console.log(itm)
-                const data = await Orders.findAll({
-                    where: {
-                        subscribeID: itm.id
-                    }
-                })
-                // console.log("Active Found --------->", data)
-                // await Orders.create(data)
-            }
-        })
-        await Orders.destroy({
+        // allSubscription.items.map(async itm => {
+        //     if (itm.status === "active") {
+        //         // console.log(itm)
+        //         const data = await Orders.findAll({
+        //             where: {
+        //                 subscribeID: itm.id
+        //             }
+        //         })
+        //         // console.log("Active Found --------->", data)
+        //         // await Orders.create(data)
+        //     }
+        // })
+        const data = await Orders.findAll({
             where: {
-                subscribeID: 'sub_IjD6bzbcKzUmeS'
-            }
-        }).then(async datax => {
-            console.log('Deleted Successfully ----->', datax)
-            const data = await Orders.findAll({
-                where: {
-                    subscribeID: 'sub_IjD6bzbcKzUmeS'
-                },
-                raw: true
-            })
-            let obj = {
-                date: Date.now(),
-                ...data
-            }
-            delete obj.id;
-            console.log('Data ----> ', obj)
-            Orders.create(obj).then(dt => {
-                return res.status(400).json({ success: true, msg: dt })
-            }).catch(err => { return res.status(400).json({ success: false, msg: { "error": err } }) });
-        }).catch(err => {
-            return res.status(400).json({ success: false, msg: { "error": err } })
+                subscribeID: 'sub_IjD4N8cdgq4ByN'
+            },
+            raw: true
         })
+        const id = data['0'].id;
+        delete data['0'].id;
+        delete data['0'].date;
+        delete data['0'].delivery_status
+        let obj = {
+            date: Number(Date.now().toString().substring(0, 10)),
+            delivery_status: "pending",
+            ...data["0"] 
+        }
+        // console.log('Data ----> ', obj)
+        Orders.create(obj).then(dt => {
+            OrderDetails.findAll({
+                where : {order_id:id},
+                raw:true
+            }).then(dtx => {
+                delete dtx[0].id;
+                delete dtx[0].order_id
+                let obj = {
+                    ...dtx[0],
+                    order_id:dt.id
+                }
+                OrderDetails.create(obj).then(obj).then(dataJ => {
+                    return res.status(400).json({ success: true, msg: { "createdOrder": {...dt,...dataJ} } })
+                }).catch(err => res.status(400).json({ success: false, msg: { "error": err } }))
+            })
+        }).catch(err => { return res.status(400).json({ success: false, msg: { "error": err } }) });
     } catch (error) {
         console.log('Error --> ', error);
         return res.status(400).json({ success: false, msg: error });
     }
 })
 
+app.get('/cancelSub/:subs_id', async (req, res) => {
+    try {
+        const { subs_id } = req.params;
+        const resData = await instance.subscriptions.cancel(subs_id);
+        res.status(200).json({ success: true, msg: resData });
+    } catch (error) {
+        console.log('Error ---> ', error)
+        return res.status(400).json({ success: false, msg: error });
+    }
+})
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
