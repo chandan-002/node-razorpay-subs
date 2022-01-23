@@ -69,44 +69,6 @@ app.post('/subs', async (req, res) => {
     return res.status(400).json({ success: false, msg: "Error Occurred" });
 })
 
-//Get Subscription by id
-app.get('/status/:subs_id', async (req, res) => {
-    const { subs_id } = req.params;
-    try {
-
-        setInterval(async () => {
-            const subsData = await instance.subscriptions.fetch(subs_id);
-            console.log(subsData.status)
-
-            if (subsData.status === "active") {
-                //   await Orders.update({payment_status:"paid"},{
-                //       where :{
-                //         subscribeID:subs_id
-                //       }
-                //   })  
-                return res.status(200).json({ success: true, msg: subsData });
-            }
-        }, 3000);
-
-        // let status = "";
-        // while (status !== "active") {
-        //     const subsData = await instance.subscriptions.fetch(subs_id);
-        //     if (subsData.status === "active") {
-        //         //   await Orders.update({payment_status:"paid"},{
-        //         //       where :{
-        //         //         subscribeID:subs_id
-        //         //       }
-        //         //   })  
-        //         return res.status(200).json({ success: true, msg: subsData });
-        //     }
-        //     status = subsData.status;
-        // }
-    } catch (error) {
-        console.log('Error -->', error);
-        return res.status(400).json({ success: false, msg: error });
-    }
-})
-
 //cron job
 cron.schedule('* * * * *', () => {
     console.log('I run in 1 min');
