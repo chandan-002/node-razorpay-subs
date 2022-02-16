@@ -91,6 +91,10 @@ exports.Orders = db.define('orders', {
     type: seq.TEXT,
     allowNull: true,
   },
+  invoice_id: {
+    type: seq.TEXT,
+    allowNull: true,
+  },
   subscribeStatus: {
     type: seq.TEXT,
     allowNull: true,
