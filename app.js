@@ -6,7 +6,7 @@ const axios = require('axios');
 const { db } = require('./config/conn');
 var cron = require('node-cron');
 
-
+require('dotenv').config()
 const app = express();
 
 //Models
@@ -21,7 +21,7 @@ app.use(cors());
 // ------------------ Database connection check and creating razorpay instance --------------------
 
 const r = axios.create({
-    baseURL: 'https://staging-express.delhivery.com/api/',
+    baseURL: 'https://staging-express.delhivery.com/',
     headers: {
         "Content-Type": "application/json",
         Authorization: `Token ${process.env.DELHIVERY_TOKEN}`,
@@ -170,7 +170,7 @@ app.get('/cancelSub/:subs_id', async (req, res) => {
 app.post('api/cmu/create.json', async (req, res) => {
     const { product, name, city, pin, country, phone, add } = req.body;
     try {
-        const creation = await axios.post('cmu/create.json', {
+        const creation = await axios.post('api/cmu/create.json', {
             "shipments": [
                 ...product
             ],
@@ -202,7 +202,7 @@ app.post('api/cmu/create.json', async (req, res) => {
 app.get('/delivery/tracking', async (req, res) => {
     const { waybill, token } = req.query;
     try {
-        const track = await r.get(`v1/packages/json/?waybill=${waybill}&token=${token}`);
+        const track = await r.get(`api/v1/packages/json/?waybill=${waybill}&token=${token}`);
         console.log(track);
     } catch (error) {
         console.warn(error)
@@ -213,13 +213,30 @@ app.get('/delivery/tracking', async (req, res) => {
 app.post('/delivery/cancel', async (req, res) => {
     const { waybill } = req.body;
     try {
-        const track = await r.get(`p/edit`, {
+        const track = await r.post(`api/p/edit`, {
             "waybill": waybill,
             "cancellation": true
         });
         console.log(track);
     } catch (error) {
         console.warn(error)
+    }
+})
+
+// check if deliverable 
+
+app.get('/delivery/pincode/:pincode', async (req, res) => {
+    try {
+        const { pincode } = req.params;
+        const pincodeData = await r.get(`c/api/pin-codes/json/?token=${process.env.DELHIVERY_TOKEN}&filter_codes=${pincode}`)
+        console.log(pincodeData.data)
+        if (pincodeData) {
+            res.status(200).json({ success: true, msg: pincodeData.data })
+        }
+    } catch (error) {
+        res.json({ success: true, msg: error})
+        console.warn(error)
+
     }
 })
 
