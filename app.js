@@ -3,6 +3,8 @@ const Razorpay = require('razorpay');
 const cors = require('cors');
 const chalk = require("chalk");
 const axios = require('axios');
+const fetch = require('node-fetch');
+const qs = require('qs');
 const { db } = require('./config/conn');
 var cron = require('node-cron');
 
@@ -21,7 +23,7 @@ app.use(cors());
 // ------------------ Database connection check and creating razorpay instance --------------------
 
 const r = axios.create({
-    baseURL: 'https://staging-express.delhivery.com/',
+    baseURL: process.env.URL,
     headers: {
         "Content-Type": "application/json",
         Authorization: `Token ${process.env.DELHIVERY_TOKEN}`,
@@ -167,42 +169,34 @@ app.get('/cancelSub/:subs_id', async (req, res) => {
 // ------------------ Delhivery related APIs --------------------
 
 // Create a order
-app.post('api/cmu/create.json', async (req, res) => {
-    const { product, name, city, pin, country, phone, add } = req.body;
+app.post('/delivery/create', async (req, res) => {
+    const { shipments, pickup_location } = req.body;
     try {
-        const creation = await axios.post('api/cmu/create.json', {
-            "shipments": [
-                ...product
-            ],
-            "pickup_location": {
-                "name": name,
-                "city": city,
-                "pin": pin,
-                "country": country,
-                "phone": phone,
-                "add": add
-            }
+        let order_id = shipments[0].order;
+        let obj = JSON.stringify({ shipments: shipments, pickup_location: pickup_location })
+        const creation = await axios({
+            method: 'post',
+            headers: { 'content-type': 'application/x-www-form-urlencoded', Authorization: `Token ${process.env.DELHIVERY_TOKEN}` },
+            data: `format=json&data=${obj}`,
+            url: `${process.env.URL}/api/cmu/create.json`,
         })
         if (creation) {
-            console.log(creation);
-            // Orders.update({
-
-            // }, {
-            //     where: {
-            //         order_id
-            //     }
-            // })
+            console.log(creation)
+            res.status(200).json({
+                success: true, msg: creation?.data
+            })
         }
     } catch (error) {
+        res.json({ success: false, msg: error })
         console.warn(error)
     }
 })
 
 // Track a Order
 app.get('/delivery/tracking', async (req, res) => {
-    const { waybill, token } = req.query;
+    const { waybill} = req.query;
     try {
-        const track = await r.get(`api/v1/packages/json/?waybill=${waybill}&token=${token}`);
+        const track = await r.get(`api/v1/packages/json/?waybill=${waybill}&token=${process.env.DELHIVERY_TOKEN}`);
         console.log(track);
     } catch (error) {
         console.warn(error)
@@ -224,17 +218,17 @@ app.post('/delivery/cancel', async (req, res) => {
 })
 
 // check if deliverable 
-
 app.get('/delivery/pincode/:pincode', async (req, res) => {
     try {
         const { pincode } = req.params;
         const pincodeData = await r.get(`c/api/pin-codes/json/?token=${process.env.DELHIVERY_TOKEN}&filter_codes=${pincode}`)
-        console.log(pincodeData.data)
+        // console.log(pincodeData.data)
         if (pincodeData) {
-            res.status(200).json({ success: true, msg: pincodeData.data })
+            let why = pincodeData?.data?.delivery_codes.length === 0 ? 'No' : 'Yes'
+            res.status(200).json({ success: true, msg: { text: why, data: pincodeData.data.delivery_codes } })
         }
     } catch (error) {
-        res.json({ success: true, msg: error})
+        res.json({ success: true, msg: error })
         console.warn(error)
 
     }
