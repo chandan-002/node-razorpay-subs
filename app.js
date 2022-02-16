@@ -24,7 +24,7 @@ const r = axios.create({
     baseURL: 'https://staging-express.delhivery.com/api/',
     headers: {
         "Content-Type": "application/json",
-        // Authorization: `Token ${localStorage.getItem('token')}`,
+        Authorization: `Token ${process.env.DELHIVERY_TOKEN}`,
         Accept: "application/json",
     },
 });
@@ -37,8 +37,8 @@ db.authenticate()
 
 var instance = new Razorpay({
     // key_id: 'rzp_test_FHG3b2XqJf4TZA',
-    key_id: 'rzp_test_aUdniKNO3qpNgX',
-    key_secret: 'a20UAQqdjD1BJetEu9NymsT3'
+    key_id: process.env.RZR_KEY,
+    key_secret: process.env.RZR_SECRET
 });
 
 // ------------------ Razirpay related APIs --------------------
