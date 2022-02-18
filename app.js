@@ -298,6 +298,8 @@ app.post('/delivery/reverse', async (req, res) => {
             OrderDetails.update({
                 return_upload_wbn: creation?.data?.upload_wbn,
                 return_waybill: itm?.waybill
+            }, {
+                id: ids[idx];
             }).then(dt => {
                 success = true;
             }).catch(err => {
