@@ -75,7 +75,7 @@ exports.OrderDetails = db.define('order_details', {
       is_order_cancel: {
         type: seq.TINYINT,
         allowNull: true,
-        defaultValue:false
+        defaultValue:0
       },
       pickup_point_id: {
         type: seq.INTEGER,

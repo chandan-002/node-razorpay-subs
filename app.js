@@ -239,7 +239,7 @@ app.get('/delivery/tracking', async (req, res) => {
         const track = await r.get(`api/v1/packages/json/?waybill=${waybill}&token=${process.env.DELHIVERY_TOKEN}`);
         if (track?.data) {
             // console.log(track)
-            res.status(201).json({ success: true, msg: {...track?.data?.ShipmentData[0]?.Shipment?.Status,StatusAWB:track?.data?.ShipmentData[0]?.Shipment?.AWB} })
+            res.status(201).json({ success: true, msg: { ...track?.data?.ShipmentData[0]?.Shipment?.Status, StatusAWB: track?.data?.ShipmentData[0]?.Shipment?.AWB } })
         }
     } catch (error) {
         console.warn(error)
@@ -265,7 +265,7 @@ app.post('/delivery/cancel', async (req, res) => {
                 }
             }).then(dt => {
 
-                res.status(200).json({ success: true, msg: {text:"Order Cancelled" ,data : cancel?.data} })
+                res.status(200).json({ success: true, msg: { text: "Order Cancelled", data: cancel?.data } })
             })
                 .catch(err => {
                     res.json({
