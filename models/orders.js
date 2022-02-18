@@ -95,6 +95,14 @@ exports.Orders = db.define('orders', {
     type: seq.TEXT,
     allowNull: true,
   },
+  upload_wbn: {
+    type: seq.TEXT,
+    allowNull: true,
+  },
+  waybill: {
+    type: seq.TEXT,
+    allowNull: true,
+  },
   subscribeStatus: {
     type: seq.TEXT,
     allowNull: true,

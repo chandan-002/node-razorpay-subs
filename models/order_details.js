@@ -55,6 +55,22 @@ exports.OrderDetails = db.define('order_details', {
       shipping_type: {
         type: seq.STRING(255),
         allowNull: true
+      } ,upload_wbn: {
+        type: seq.TEXT,
+        allowNull: true,
+      },
+      waybill: {
+        type: seq.TEXT,
+        allowNull: true,
+      }
+      ,
+      return_upload_wbn: {
+        type: seq.TEXT,
+        allowNull: true,
+      },
+      return_waybill: {
+        type: seq.TEXT,
+        allowNull: true,
       },
       pickup_point_id: {
         type: seq.INTEGER,

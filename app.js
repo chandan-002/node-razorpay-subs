@@ -3,8 +3,6 @@ const Razorpay = require('razorpay');
 const cors = require('cors');
 const chalk = require("chalk");
 const axios = require('axios');
-const fetch = require('node-fetch');
-const qs = require('qs');
 const { db } = require('./config/conn');
 var cron = require('node-cron');
 
@@ -43,7 +41,7 @@ var instance = new Razorpay({
     key_secret: process.env.RZR_SECRET
 });
 
-// ------------------ Razirpay related APIs --------------------
+// ------------------ Razorpay related APIs --------------------
 
 //Create Plan & subscription
 app.post('/subs', async (req, res) => {
@@ -170,21 +168,63 @@ app.get('/cancelSub/:subs_id', async (req, res) => {
 
 // Create a order
 app.post('/delivery/create', async (req, res) => {
-    const { shipments, pickup_location } = req.body;
+    const { order_id, shipments, pickup_location, type } = req.body;
     try {
-        let order_id = shipments[0].order;
-        let obj = JSON.stringify({ shipments: shipments, pickup_location: pickup_location })
+        if (type === 'return') {
+            let obj = JSON.stringify({ pickup_location: pickup_location, shipments: shipments })
+        } else {
+            let obj = JSON.stringify({ shipments: shipments, pickup_location: pickup_location })
+        }
         const creation = await axios({
             method: 'post',
             headers: { 'content-type': 'application/x-www-form-urlencoded', Authorization: `Token ${process.env.DELHIVERY_TOKEN}` },
             data: `format=json&data=${obj}`,
             url: `${process.env.URL}/api/cmu/create.json`,
         })
-        if (creation) {
-            console.log(creation)
-            res.status(200).json({
-                success: true, msg: creation?.data
-            })
+        if (creation?.data) {
+            // console.log(creation)
+            if (type === 'return') {
+                OrderDetails.update({
+                    return_upload_wbn: creation?.data?.upload_wbn,
+                    return_waybill: creation?.data?.packages[0]?.waybill
+                }, {
+                    where: {
+                        id: order_id
+                    }
+                })
+                    .then(dt => {
+                        // console.log('Order id --->',order_id,'-->',creation?.data?.packages[0]?.waybill)
+                        res.status(200).json({
+                            success: true, msg: "Successfully created !", response: creation?.data
+                        })
+                    })
+                    .catch(err => {
+                        res.json({
+                            success: false, msg: "failed"
+                        })
+                    })
+            } else {
+                OrderDetails.update({
+                    upload_wbn: creation?.data?.upload_wbn,
+                    waybill: creation?.data?.packages[0]?.waybill
+                }, {
+                    where: {
+                        id: order_id
+                    }
+                })
+                    .then(dt => {
+                        // console.log('Order id --->',order_id,'-->',creation?.data?.packages[0]?.waybill)
+                        res.status(200).json({
+                            success: true, msg: "Successfully created !", response: creation?.data
+                        })
+                    })
+                    .catch(err => {
+                        res.json({
+                            success: false, msg: "failed"
+                        })
+                    })
+            }
+
         }
     } catch (error) {
         res.json({ success: false, msg: error })
@@ -194,12 +234,17 @@ app.post('/delivery/create', async (req, res) => {
 
 // Track a Order
 app.get('/delivery/tracking', async (req, res) => {
-    const { waybill} = req.query;
+    const { waybill } = req.query;
+    console.log('Watbill --> ', waybill)
     try {
         const track = await r.get(`api/v1/packages/json/?waybill=${waybill}&token=${process.env.DELHIVERY_TOKEN}`);
-        console.log(track);
+        if (track?.data) {
+            // console.log(track)
+            res.status(201).json({ success: true, msg: track?.data })
+        }
     } catch (error) {
         console.warn(error)
+        res.json({ success: false, msg: error })
     }
 })
 
