@@ -230,6 +230,57 @@ app.post('/delivery/create', async (req, res) => {
         console.warn(error)
     }
 })
+// Create a reverse pickup
+app.post('/delivery/reverse', async (req, res) => {
+    const { order_id } = req.body;
+    const orders = await Orders.findOne({
+        where: {
+            id: order_id
+        }, raw: true
+    })
+    pickup_location = {
+        add: process.env.DE_ADD,
+        country: process.env.DE_COUNTRY,
+        pin: process.env.DE_PIN,
+        phone: process.env.DE_PHONE,
+        city: process.env.DE_CITY,
+        name: process.env.DE_PICKEUP_WAREHOUSE,
+        state: process.env.DE_STATE
+    }
+    const order_details = await OrderDetails.findAll({
+        where: {
+            order_id: order_id
+        },
+        raw: true
+    });
+    const arr = [];
+    order_details.map.map(itm => {
+        shipments.push({
+            "country": orders?.country,
+            "city": orders?.city,
+            "return_phone": orders?.phone,
+            "pin": orders?.postal_code,
+            "seller_inv": "",
+            "state": orders?.state,
+            "return_name": orders?.name,
+            "order": "",
+            "add": orders?.address,
+
+            "payment_mode": orders?.payment_type,
+            "quantity": itm?.quantity,
+            "return_add": orders?.address,
+            "phone": orders?.phone,
+            "total_amount": orders?.grand_total,
+            "name": orders?.name,
+            "return_country": orders?.country,
+            "return_city": orders?.city,
+            "return_state": orders?.state,
+            "return_pin": orders?.postal_code
+        })
+    })
+    console.log(arr);
+    res.status(200).json({success:true,msg:'Working'})
+})
 
 // Track a Order
 app.get('/delivery/tracking', async (req, res) => {
@@ -250,7 +301,7 @@ app.get('/delivery/tracking', async (req, res) => {
 // Cancel a delivery
 app.post('/delivery/cancel', async (req, res) => {
     const { waybill, order_id } = req.body;
-    console.log(waybill,order_id);
+    console.log(waybill, order_id);
     console.log('_________')
     console.log(req.body)
     try {
