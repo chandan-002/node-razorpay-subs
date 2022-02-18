@@ -292,14 +292,14 @@ app.post('/delivery/reverse', async (req, res) => {
     })
 
     if (creation?.data) {
-        var success = false;
+        var success = true;
         // console.log(creation?.data);
         creation?.data.packages.map(async (itm, idx) => {
             OrderDetails.update({
                 return_upload_wbn: creation?.data?.upload_wbn,
                 return_waybill: itm?.waybill
             }, {
-                id: ids[idx];
+                id: ids[idx]
             }).then(dt => {
                 success = true;
             }).catch(err => {
