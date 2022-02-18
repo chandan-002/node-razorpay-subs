@@ -254,17 +254,17 @@ app.post('/delivery/reverse', async (req, res) => {
         raw: true
     });
     const arr = [];
-    order_details.map.map(itm => {
-        shipments.push({
-            "country": orders?.country,
-            "city": orders?.city,
-            "return_phone": orders?.phone,
-            "pin": orders?.postal_code,
+    order_details.map(itm => {
+        arr.push({
+            "country": orders?.shipping_address.country,
+            "city": orders?.shipping_address.city,
+            "return_phone": orders?.shipping_address.phone,
+            "pin": orders?.shipping_address.postal_code,
             "seller_inv": "",
-            "state": orders?.state,
-            "return_name": orders?.name,
+            "state": orders?.shipping_address.state,
+            "return_name": orders?.shipping_address.name,
             "order": "",
-            "add": orders?.address,
+            "add": orders?.shipping_address.address,
 
             "payment_mode": orders?.payment_type,
             "quantity": itm?.quantity,
@@ -279,7 +279,7 @@ app.post('/delivery/reverse', async (req, res) => {
         })
     })
     console.log(arr);
-    res.status(200).json({success:true,msg:'Working'})
+    res.status(200).json({ success: true, msg: 'Working' })
 })
 
 // Track a Order
