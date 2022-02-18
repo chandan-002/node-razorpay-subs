@@ -72,6 +72,11 @@ exports.OrderDetails = db.define('order_details', {
         type: seq.TEXT,
         allowNull: true,
       },
+      is_order_cancel: {
+        type: seq.BOOLEAN,
+        allowNull: true,
+        defaultValue:false
+      },
       pickup_point_id: {
         type: seq.INTEGER,
         allowNull: true

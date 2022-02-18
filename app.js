@@ -249,14 +249,34 @@ app.get('/delivery/tracking', async (req, res) => {
 
 // Cancel a delivery
 app.post('/delivery/cancel', async (req, res) => {
-    const { waybill } = req.body;
+    const { waybill, order_id } = req.body;
     try {
-        const track = await r.post(`api/p/edit`, {
+        const cancel = await r.post(`api/p/edit`, {
             "waybill": waybill,
             "cancellation": true
         });
-        console.log(track);
+        console.log(cancel)
+        if (cancel?.data) {
+            OrderDetails.update({
+                is_order_cancel: 1
+            }, {
+                where: {
+                    id: order_id
+                }
+            }).then(dt => {
+
+                res.status(200).json({ success: true, msg: cancel?.data })
+            })
+                .catch(err => {
+                    res.json({
+                        success: false,
+                        msg: "Order might be cancelled, database update failed",
+                        error_response: err
+                    })
+                })
+        }
     } catch (error) {
+        res.json({ success: true, msg: error })
         console.warn(error)
     }
 })
