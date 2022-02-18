@@ -175,7 +175,7 @@ app.post('/delivery/create', async (req, res) => {
         } else {
             obj = JSON.stringify({ shipments: shipments, pickup_location: pickup_location })
         }
-        console.log('Order --->',shipments[0].order)
+        // console.log('Order --->', shipments[0].order)
         const creation = await axios({
             method: 'post',
             headers: { 'content-type': 'application/x-www-form-urlencoded', Authorization: `Token ${process.env.DELHIVERY_TOKEN}` },
@@ -265,9 +265,9 @@ app.post('/delivery/reverse', async (req, res) => {
             "seller_inv": "",
             "state": orders_new?.state,
             "return_name": orders_new?.name,
-            "order": "",
+            "order": orders?.code,
             "add": orders_new?.address,
-       
+
             "total_amount": orders?.grand_total,
             "quantity": itm?.quantity,
 
@@ -281,8 +281,18 @@ app.post('/delivery/reverse', async (req, res) => {
             "return_pin": orders_new?.postal_code
         })
     })
-    console.log(arr);
-    res.status(200).json({ success: true, msg: 'Working' })
+    let obj = JSON.stringify({ pickup_location: pickup_location, shipments: arr });
+    const creation = await axios({
+        method: 'post',
+        headers: { 'content-type': 'application/x-www-form-urlencoded', Authorization: `Token ${process.env.DELHIVERY_TOKEN}` },
+        data: `format=json&data=${obj}`,
+        url: `${process.env.URL}/api/cmu/create.json`,
+    })
+
+    if (creation?.data){
+        console.log(creation?.data);
+        res.status(200).json({ success: true, msg: creation?.data })
+    }
 })
 
 // Track a Order
