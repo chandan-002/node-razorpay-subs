@@ -265,7 +265,7 @@ app.post('/delivery/cancel', async (req, res) => {
                 }
             }).then(dt => {
 
-                res.status(200).json({ success: true, msg: cancel?.data })
+                res.status(200).json({ success: true, msg: {text:"Order Cancelled" ,data : cancel?.data} })
             })
                 .catch(err => {
                     res.json({
