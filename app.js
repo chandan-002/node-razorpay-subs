@@ -304,7 +304,12 @@ app.post('/delivery/reverse', async (req, res) => {
                 success = false;
             })
         })
-        res.status(200).json({ success: true, msg: creation?.data })
+
+        if (success) {
+            res.status(200).json({ success: true, text: 'Successfull refund', msg: creation?.data })
+        } else {
+            res.status(200).json({ success: true, text: 'Something went wrong', msg: creation?.data })
+        }
     }
 })
 
