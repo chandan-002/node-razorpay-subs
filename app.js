@@ -271,7 +271,7 @@ app.post('/delivery/reverse', async (req, res) => {
             "total_amount": orders?.grand_total,
             "quantity": itm?.quantity,
 
-            "payment_mode": orders?.payment_type,
+            "payment_mode": orders?.payment_type === 'cash_on_delivery' ? 'COD' : 'pre-paid',
             "return_add": orders_new?.address,
             "phone": orders_new?.phone,
             "name": orders_new?.name,
