@@ -234,12 +234,12 @@ app.post('/delivery/create', async (req, res) => {
 // Track a Order
 app.get('/delivery/tracking', async (req, res) => {
     const { waybill } = req.query;
-    console.log('Watbill --> ', waybill)
+    // console.log('Watbill --> ', waybill)
     try {
         const track = await r.get(`api/v1/packages/json/?waybill=${waybill}&token=${process.env.DELHIVERY_TOKEN}`);
         if (track?.data) {
             // console.log(track)
-            res.status(201).json({ success: true, msg: track?.data })
+            res.status(201).json({ success: true, msg: track?.data?.ShipmentData[0]?.Shipment?.Status })
         }
     } catch (error) {
         console.warn(error)
