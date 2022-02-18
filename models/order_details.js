@@ -73,7 +73,7 @@ exports.OrderDetails = db.define('order_details', {
         allowNull: true,
       },
       is_order_cancel: {
-        type: seq.BOOLEAN,
+        type: seq.TINYINT,
         allowNull: true,
         defaultValue:false
       },
