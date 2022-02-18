@@ -269,7 +269,7 @@ app.post('/delivery/reverse', async (req, res) => {
             "return_name": orders_new?.name,
             "add": orders_new?.address,
 
-            "order": orders?.code + Date.now()+(Math.random() * 1000000).toFixed(0),
+            "order": orders?.code + Date.now() + (Math.random() * 1000000).toFixed(0),
             "total_amount": orders?.grand_total,
             "quantity": itm?.quantity,
 
@@ -292,7 +292,18 @@ app.post('/delivery/reverse', async (req, res) => {
     })
 
     if (creation?.data) {
-        console.log(creation?.data);
+        var success = false;
+        // console.log(creation?.data);
+        creation?.data.packages.map(async (itm, idx) => {
+            OrderDetails.update({
+                return_upload_wbn: creation?.data?.upload_wbn,
+                return_waybill: itm?.waybill
+            }).then(dt => {
+                success = true;
+            }).catch(err => {
+                success = false;
+            })
+        })
         res.status(200).json({ success: true, msg: creation?.data })
     }
 })
