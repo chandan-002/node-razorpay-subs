@@ -239,7 +239,7 @@ app.get('/delivery/tracking', async (req, res) => {
         const track = await r.get(`api/v1/packages/json/?waybill=${waybill}&token=${process.env.DELHIVERY_TOKEN}`);
         if (track?.data) {
             // console.log(track)
-            res.status(201).json({ success: true, msg: track?.data?.ShipmentData[0]?.Shipment?.Status })
+            res.status(201).json({ success: true, msg: {...track?.data?.ShipmentData[0]?.Shipment?.Status,StatusAWB:track?.data?.ShipmentData[0]?.Shipment?.AWB} })
         }
     } catch (error) {
         console.warn(error)
