@@ -256,7 +256,7 @@ app.post('/delivery/reverse', async (req, res) => {
     const arr = [];
     const orders_new = JSON.parse(orders.shipping_address);
     order_details.map(itm => {
-        shipments.push({
+        arr.push({
             "country": orders_new?.country,
             "city": orders_new?.city,
             "return_phone": orders_new?.phone,
