@@ -175,6 +175,7 @@ app.post('/delivery/create', async (req, res) => {
         } else {
             obj = JSON.stringify({ shipments: shipments, pickup_location: pickup_location })
         }
+        console.log('Order --->',shipments[0].order)
         const creation = await axios({
             method: 'post',
             headers: { 'content-type': 'application/x-www-form-urlencoded', Authorization: `Token ${process.env.DELHIVERY_TOKEN}` },
