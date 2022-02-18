@@ -250,6 +250,9 @@ app.get('/delivery/tracking', async (req, res) => {
 // Cancel a delivery
 app.post('/delivery/cancel', async (req, res) => {
     const { waybill, order_id } = req.body;
+    console.log(waybill,order_id);
+    console.log('_________')
+    console.log(req.body)
     try {
         const cancel = await r.post(`api/p/edit`, {
             "waybill": waybill,
