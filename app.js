@@ -4,7 +4,7 @@ const cors = require('cors');
 const chalk = require("chalk");
 const axios = require('axios');
 const { db } = require('./config/conn');
-var cron = require('node-cron');
+const cron = require('node-cron');
 
 require('dotenv').config()
 const app = express();
@@ -36,7 +36,6 @@ db.authenticate()
     .catch(err => console.log(chalk.bold.redBright(`Database connection failed : ${err}`)));
 
 var instance = new Razorpay({
-    // key_id: 'rzp_test_FHG3b2XqJf4TZA',
     key_id: process.env.RZR_KEY,
     key_secret: process.env.RZR_SECRET
 });
@@ -170,10 +169,11 @@ app.get('/cancelSub/:subs_id', async (req, res) => {
 app.post('/delivery/create', async (req, res) => {
     const { order_id, shipments, pickup_location, type } = req.body;
     try {
+        var obj;
         if (type === 'return') {
-            let obj = JSON.stringify({ pickup_location: pickup_location, shipments: shipments })
+            obj = JSON.stringify({ pickup_location: pickup_location, shipments: shipments })
         } else {
-            let obj = JSON.stringify({ shipments: shipments, pickup_location: pickup_location })
+            obj = JSON.stringify({ shipments: shipments, pickup_location: pickup_location })
         }
         const creation = await axios({
             method: 'post',
@@ -224,7 +224,6 @@ app.post('/delivery/create', async (req, res) => {
                         })
                     })
             }
-
         }
     } catch (error) {
         res.json({ success: false, msg: error })
@@ -270,7 +269,7 @@ app.get('/delivery/pincode/:pincode', async (req, res) => {
         // console.log(pincodeData.data)
         if (pincodeData) {
             let why = pincodeData?.data?.delivery_codes.length === 0 ? 'No' : 'Yes'
-            res.status(200).json({ success: true, msg: { text: why, data: pincodeData.data.delivery_codes } })
+            res.status(200).json({ success: true, msg: { text: why, data: pincodeData?.data?.delivery_codes } })
         }
     } catch (error) {
         res.json({ success: true, msg: error })
@@ -278,9 +277,6 @@ app.get('/delivery/pincode/:pincode', async (req, res) => {
 
     }
 })
-
-
-
 
 const PORT = process.env.PORT || 5000;
 
