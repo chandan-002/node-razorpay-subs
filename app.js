@@ -269,7 +269,7 @@ app.post('/delivery/reverse', async (req, res) => {
             "return_name": orders_new?.name,
             "add": orders_new?.address,
 
-            "order": orders?.code + Date.now(),
+            "order": orders?.code + Date.now()+(Math.random() * 1000000).toFixed(0),
             "total_amount": orders?.grand_total,
             "quantity": itm?.quantity,
 
