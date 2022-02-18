@@ -254,28 +254,30 @@ app.post('/delivery/reverse', async (req, res) => {
         raw: true
     });
     const arr = [];
+    const orders_new = JSON.parse(orders.shipping_address);
     order_details.map(itm => {
-        arr.push({
-            "country": orders?.shipping_address.country,
-            "city": orders?.shipping_address.city,
-            "return_phone": orders?.shipping_address.phone,
-            "pin": orders?.shipping_address.postal_code,
+        shipments.push({
+            "country": orders_new?.country,
+            "city": orders_new?.city,
+            "return_phone": orders_new?.phone,
+            "pin": orders_new?.postal_code,
             "seller_inv": "",
-            "state": orders?.shipping_address.state,
-            "return_name": orders?.shipping_address.name,
+            "state": orders_new?.state,
+            "return_name": orders_new?.name,
             "order": "",
-            "add": orders?.shipping_address.address,
+            "add": orders_new?.address,
+       
+            "total_amount": orders?.grand_total,
+            "quantity": itm?.quantity,
 
             "payment_mode": orders?.payment_type,
-            "quantity": itm?.quantity,
-            "return_add": orders?.address,
-            "phone": orders?.phone,
-            "total_amount": orders?.grand_total,
-            "name": orders?.name,
-            "return_country": orders?.country,
-            "return_city": orders?.city,
-            "return_state": orders?.state,
-            "return_pin": orders?.postal_code
+            "return_add": orders_new?.address,
+            "phone": orders_new?.phone,
+            "name": orders_new?.name,
+            "return_country": orders_new?.country,
+            "return_city": orders_new?.city,
+            "return_state": orders_new?.state,
+            "return_pin": orders_new?.postal_code
         })
     })
     console.log(arr);
