@@ -255,8 +255,10 @@ app.post('/delivery/reverse', async (req, res) => {
         raw: true
     });
     const arr = [];
-    const orders_new = JSON.parse(orders.shipping_address);
+    const orders_new = JSON.parse(orders?.shipping_address);
+    const ids = [];
     order_details.map(itm => {
+        ids.push(itm.id)
         arr.push({
             "country": orders_new?.country,
             "city": orders_new?.city,
@@ -265,9 +267,9 @@ app.post('/delivery/reverse', async (req, res) => {
             "seller_inv": "",
             "state": orders_new?.state,
             "return_name": orders_new?.name,
-            "order": orders?.code,
             "add": orders_new?.address,
 
+            "order": orders?.code + Date.now(),
             "total_amount": orders?.grand_total,
             "quantity": itm?.quantity,
 
@@ -289,7 +291,7 @@ app.post('/delivery/reverse', async (req, res) => {
         url: `${process.env.URL}/api/cmu/create.json`,
     })
 
-    if (creation?.data){
+    if (creation?.data) {
         console.log(creation?.data);
         res.status(200).json({ success: true, msg: creation?.data })
     }
