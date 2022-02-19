@@ -14,10 +14,10 @@ if (process.env.NODE_ENV === 'PRODUCTION') {
         }
     });
 } else {
-    exports.db = new Sequelize('ecommerce_test', 'root', 'wemo@1234', {
+    exports.db = new Sequelize('ecommerce_test', 'root', '', {
         host: '127.0.0.1',
         dialect: 'mysql',
-        port: '3307', //-------------> change port here
+        port: '3306', //-------------> change port here
         // operatorsAliases: false,
         logging:false,
         pool: {

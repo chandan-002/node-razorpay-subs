@@ -85,6 +85,19 @@ app.post('/subs', async (req, res) => {
     }
     return res.status(400).json({ success: false, msg: "Error Occurred" });
 })
+// Get invoice_id for a subscription
+// app.get('/subs/invoice/:sub_id', async (req, res) => {
+//     const { sub_id } = req.params;
+//     try {
+//         const invoice = await instance.invoices.all({
+//             'subscription_id': sub_id
+//         });
+//         res.status(200).json({ success: true, json: invoice });
+//     } catch (error) {
+//         res.json({ success: false, json: error });
+
+//     }
+// })
 
 //cron job for creating new order if subscription is renewed
 const registerOrder = async () => {
@@ -101,7 +114,7 @@ const registerOrder = async () => {
                 const allInvoices = await instance.invoices.all({
                     'subscription_id': itm.id
                 })
-                if (data?.invoice_id !== allInvoices.items[allInvoices.items.length - 1].id && allInvoices.items[allInvoices.items.length - 1].status === 'paid') {
+                if (data?.invoice_id !== allInvoices.items[allInvoices.items.length - 1].payment_id && allInvoices.items[allInvoices.items.length - 1].status === 'paid') {
                     const data = await Orders.findAll({
                         where: {
                             subscribeID: itm.id
@@ -272,6 +285,7 @@ app.post('/delivery/reverse', async (req, res) => {
             "order": orders?.code + Date.now() + (Math.random() * 1000000).toFixed(0),
             "total_amount": orders?.grand_total,
             "quantity": itm?.quantity,
+            "total_amount": orders?.price,  // edit 
 
             "payment_mode": orders?.payment_type === 'cash_on_delivery' ? 'COD' : 'pre-paid',
             "return_add": orders_new?.address,
@@ -316,6 +330,37 @@ app.post('/delivery/reverse', async (req, res) => {
         }
     }
 })
+
+const updateDeliveryLaravel = async () => {
+    const OrderIds = await Orders.findAll({
+        attributes: ['id'],
+        where: {
+            delivery_status: 'pending',
+        },
+        raw: true
+    });
+    const arr2d = [];
+    OrderIds.map(itm => {
+        OrderDetails.findAll({
+            attributes: ['waybill'],
+            where: {
+                order_id: itm.id
+            },
+            raw: true
+        }).then(data => {
+            let arr = [];
+            data.map(dtx => {
+                arr.push(dtx.waybill)
+            })
+            arr2d(arr);
+        })
+    })
+    console.log(arr2d);
+    // OrderIds.map(async itm => {
+    //     const track = await r.get(`api/v1/packages/json/?waybill=${waybill}&token=${process.env.DELHIVERY_TOKEN}`);
+    // });
+}
+updateDeliveryLaravel();
 
 // Track a Order
 app.get('/delivery/tracking', async (req, res) => {
