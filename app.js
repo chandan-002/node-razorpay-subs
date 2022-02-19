@@ -18,7 +18,7 @@ const { all } = require('express/lib/application');
 app.use(express.json());
 app.use(cors());
 
-// ------------------ Database connection check and creating razorpay instance --------------------
+// ---------------------------------------------------------- axios instance creation ------------------------------------------------------------
 
 const r = axios.create({
     baseURL: process.env.URL,
@@ -29,7 +29,7 @@ const r = axios.create({
     },
 });
 
-// ------------------ Database connection check and creating razorpay instance --------------------
+// ---------------------------------------------------------- Database connection check and creating razorpay instance ------------------------------------------------------------
 
 db.authenticate()
     .then((e) => console.log(chalk.bgGreen(chalk.bold.black(`Database connection succeeded`))))
@@ -40,7 +40,7 @@ var instance = new Razorpay({
     key_secret: process.env.RZR_SECRET
 });
 
-// ------------------ Razorpay related APIs --------------------
+// ---------------------------------------------------------- Razorpay related APIs ------------------------------------------------------------
 
 //Create Plan & subscription
 app.post('/subs', async (req, res) => {
@@ -99,7 +99,7 @@ app.post('/subs', async (req, res) => {
 //     }
 // })
 
-//cron job for creating new order if subscription is renewed
+// Creating new order if subscription is renewed
 const registerOrder = async () => {
     try {
         const allSubscription = await instance.subscriptions.all();
@@ -158,11 +158,7 @@ const registerOrder = async () => {
         console.log('Error --> ', error);
     }
 }
-cron.schedule('0 0 */3 * * *', () => {
-    let date = new Date();
-    console.log('Subscription check function running : ', date);
-    registerOrder();
-});
+
 
 // Cancel a subscription
 app.get('/cancelSub/:subs_id', async (req, res) => {
@@ -176,7 +172,7 @@ app.get('/cancelSub/:subs_id', async (req, res) => {
     }
 })
 
-// ------------------ Delhivery related APIs --------------------
+// ---------------------------------------------------------- Delhivery related APIs ------------------------------------------------------------
 
 // Create a order
 app.post('/delivery/create', async (req, res) => {
@@ -331,6 +327,7 @@ app.post('/delivery/reverse', async (req, res) => {
     }
 })
 
+// update delivery status in laravel if all waybills in a order id has status delivered
 const updateDeliveryLaravel = async () => {
     const OrderIds = await Orders.findAll({
         attributes: ['id'],
@@ -339,7 +336,6 @@ const updateDeliveryLaravel = async () => {
         },
         raw: true
     });
-    const arr2d = [];
     OrderIds.map(itm => {
         OrderDetails.findAll({
             attributes: ['waybill'],
@@ -348,19 +344,27 @@ const updateDeliveryLaravel = async () => {
             },
             raw: true
         }).then(data => {
-            let arr = [];
-            data.map(dtx => {
-                arr.push(dtx.waybill)
+            data.map(async (dt, index) => {
+                if (dt.waybill !== null) {
+                    try {
+                        const track = await r.get(`api/v1/packages/json/?waybill=${dt.waybill}&token=${process.env.DELHIVERY_TOKEN}`);
+                        if (track?.data?.ShipmentData[0].Shipment?.Status?.Status === "Delivered") {
+                            Orders.update({
+                                delivery_status: 'delivered'
+                            }, {
+                                where: {
+                                    id: itm.id
+                                }
+                            })
+                        }
+                    } catch (error) {
+                        console.log(error)
+                    }
+                }
             })
-            arr2d(arr);
         })
     })
-    console.log(arr2d);
-    // OrderIds.map(async itm => {
-    //     const track = await r.get(`api/v1/packages/json/?waybill=${waybill}&token=${process.env.DELHIVERY_TOKEN}`);
-    // });
 }
-updateDeliveryLaravel();
 
 // Track a Order
 app.get('/delivery/tracking', async (req, res) => {
@@ -431,6 +435,14 @@ app.get('/delivery/pincode/:pincode', async (req, res) => {
 
     }
 })
+
+// ------------------------------------------------------------ Cron Job running for subscription check and delivery status update ------------------------------------------------------------
+cron.schedule('0 0 */3 * * *', () => {
+    let date = new Date();
+    console.log('Subscription check & delivery status check function running : ', date);
+    registerOrder();
+    updateDeliveryLaravel()
+});
 
 const PORT = process.env.PORT || 5000;
 
