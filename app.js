@@ -281,7 +281,6 @@ app.post('/delivery/reverse', async (req, res) => {
             "order": orders?.code + Date.now() + (Math.random() * 1000000).toFixed(0),
             "total_amount": orders?.grand_total,
             "quantity": itm?.quantity,
-            "total_amount": orders?.price,  // edit 
 
             "payment_mode": orders?.payment_type === 'cash_on_delivery' ? 'COD' : 'pre-paid',
             "return_add": orders_new?.address,
