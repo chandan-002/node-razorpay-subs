@@ -44,7 +44,7 @@ var instance = new Razorpay({
 
 //Create Plan & subscription
 app.post('/subs', async (req, res) => {
-    console.log("Creating subscription")
+    // console.log("Creating subscription")
     let currency = "INR";
     let period = "monthly";
     let customer_notify = 1;
