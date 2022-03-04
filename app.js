@@ -189,7 +189,7 @@ app.post('/delivery/create', async (req, res) => {
             method: 'post',
             headers: { 'content-type': 'application/x-www-form-urlencoded', Authorization: `Token ${process.env.DELHIVERY_TOKEN}` },
             data: `format=json&data=${obj}`,
-            url: `${process.env.URL}/api/cmu/create.json`,
+            url: `${process.env.URL}api/cmu/create.json`,
         })
         if (creation?.data) {
             // console.log(creation)
@@ -297,7 +297,7 @@ app.post('/delivery/reverse', async (req, res) => {
         method: 'post',
         headers: { 'content-type': 'application/x-www-form-urlencoded', Authorization: `Token ${process.env.DELHIVERY_TOKEN}` },
         data: `format=json&data=${obj}`,
-        url: `${process.env.URL}/api/cmu/create.json`,
+        url: `${process.env.URL}api/cmu/create.json`,
     })
 
     if (creation?.data) {
