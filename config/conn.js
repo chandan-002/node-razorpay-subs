@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === 'PRODUCTION') {
     });
 } else {
     exports.db = new Sequelize('ecommerce_test', 'root', 'wemo@1234', {
-        host: '127.0.0.1',
+        host: process.env.HOST,
         dialect: 'mysql',
         port: '3306', //-------------> change port here
         // operatorsAliases: false,
